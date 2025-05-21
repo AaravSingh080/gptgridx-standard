@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPTGRIDX Standard Demo Bot</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #0d1117, #1e1e28);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      padding: 20px;
+      background: #161b22;
+      font-size: 1.8rem;
+      color: #FF8C42;
+      border-bottom: 2px solid #30363d;
+      width: 100%;
+    }
+    .logo {
+      margin-top: 20px;
+      width: 100px;
+      height: auto;
+    }
+    .chat-container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: #1c2128;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .chat-box {
+      height: 480px;
+      overflow-y: auto;
+      padding: 20px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .faq-buttons {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      background: #20262e;
+      border-top: 1px solid #30363d;
+      border-bottom: 1px solid #30363d;
+    }
+    .faq-buttons button {
+      background: #FF8C42;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(255, 140, 66, 0.4);
+    }
+    .faq-buttons button:hover {
+      background: #ffa857;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #30363d;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: #0d1117;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .chat-input button {
+      padding: 15px 20px;
+      background: #FF8C42;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255, 140, 66, 0.4);
+    }
+    .chat-input button:hover {
+      background: #ffa857;
+    }
+    .message {
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 8px;
+      animation: fadeIn 0.3s ease-in;
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #FF8C42;
+      color: white;
+    }
+    .bot {
+      align-self: flex-start;
+      background-color: #2f3136;
+      color: #d1d5db;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/OpenAI_Logo.svg" alt="GPTGRIDX Logo" class="logo">
+  <div class="header">🤖 GPTGRIDX Standard Demo Bot</div>
+  <div class="chat-container">
+    <div class="chat-box" id="chat-box">
+      <div class="message bot">Hello! I’m the GPTGRIDX Standard demo bot. Ask me anything about the $2,200 USD plan.</div>
+    </div>
+    <div class="faq-buttons">
+      <button onclick="quickAsk('What is GPTGRIDX?')">What is GPTGRIDX?</button>
+      <button onclick="quickAsk('Can it answer from my PDF?')">PDF Answers?</button>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Type your question..." onkeydown="if(event.key==='Enter'){sendMessage()}" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    function quickAsk(text) {
+      document.getElementById('user-input').value = text;
+      sendMessage();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const chatBox = document.getElementById('chat-box');
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user';
+      userMsg.textContent = userText;
+      chatBox.appendChild(userMsg);
+
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const botMsg = document.createElement('div');
+      botMsg.className = 'message bot';
+      botMsg.textContent = 'Thinking...';
+      chatBox.appendChild(botMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userText })
+        });
+
+        const data = await response.json();
+        botMsg.textContent = data.choices?.[0].message.content || 'Sorry, I had trouble answering.';
+      } catch (error) {
+        botMsg.textContent = 'There was an error contacting the server.';
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
